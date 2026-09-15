@@ -220,7 +220,9 @@ document.querySelector('#plantImage').src =
   plant.photos?.[0] || ''
 
   document.querySelector('#commonName').textContent =
-    plant.nomCommun
+  plant.categorie
+    ? `${plant.nomCommun} / ${plant.categorie}`
+    : plant.nomCommun
 
   document.querySelector('#genus').textContent =
     plant.genre
