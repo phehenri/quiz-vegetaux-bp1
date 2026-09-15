@@ -107,7 +107,7 @@ document.querySelector('#app').innerHTML = `
             </p>
 
             <p>
-              <span>Espèce / Cultivar</span>
+              <span>Espèce / Cultivar2</span>
               <strong id="species"></strong>
             </p>
 
@@ -218,7 +218,7 @@ function displayPlant() {
 
 document.querySelector('#plantImage').src =
   plant.photos?.[0] || ''
-  
+
   document.querySelector('#commonName').textContent =
     plant.nomCommun
 
