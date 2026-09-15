@@ -1,0 +1,183 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #f5f3ed;
+  color: #253126;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+button {
+  font: inherit;
+}
+
+.container {
+  width: min(700px, 92%);
+  margin: 60px auto;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 45px;
+}
+
+.plant-icon {
+  font-size: 55px;
+}
+
+h1 {
+  font-size: 42px;
+  margin: 10px 0;
+}
+
+.hero p {
+  color: #657066;
+}
+
+.quiz-options {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+}
+
+.quiz-options h2 {
+  margin-top: 0;
+}
+
+.categories {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 10px 0 25px;
+}
+
+.category {
+  border: 1px solid #d5dcd4;
+  background: white;
+  padding: 13px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.category:hover {
+  background: #eef3ed;
+}
+
+.category.selected {
+  background: #dfeadf;
+  border-color: #58725c;
+  color: #314b35;
+}
+
+.primary {
+  width: 100%;
+  border: 0;
+  background: #3f6547;
+  color: white;
+  padding: 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.primary:hover {
+  background: #34553b;
+}
+
+.quiz-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.back {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: #506154;
+}
+
+.card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.card img {
+  display: block;
+  width: 100%;
+  height: 430px;
+  object-fit: cover;
+}
+
+#question,
+#answer {
+  padding: 28px;
+}
+
+.question {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+#commonName {
+  font-size: 30px;
+  margin-top: 0;
+}
+
+.plant-info {
+  margin-bottom: 25px;
+}
+
+.plant-info p {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #e6e6e6;
+  padding: 10px 0;
+  gap: 20px;
+}
+
+.plant-info span {
+  color: #69736a;
+}
+
+.plant-info strong {
+  text-align: right;
+}
+
+.finish {
+  text-align: center;
+  background: white;
+  padding: 50px 30px;
+  border-radius: 20px;
+}
+
+.finish span {
+  font-size: 60px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@media (max-width: 550px) {
+  .container {
+    margin: 25px auto;
+  }
+
+  h1 {
+    font-size: 32px;
+  }
+
+  .categories {
+    grid-template-columns: 1fr;
+  }
+
+  .card img {
+    height: 330px;
+  }
+}
