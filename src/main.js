@@ -107,7 +107,7 @@ document.querySelector('#app').innerHTML = `
             </p>
 
             <p>
-              <span>Espèce / Cultivar2</span>
+              <span>Espèce / 'Cultivar'</span>
               <strong id="species"></strong>
             </p>
 
