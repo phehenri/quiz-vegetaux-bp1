@@ -1,29 +1,32 @@
 import './style.css'
 
-const plants = [
-  {
-    nomCommun: 'Tournesol',
-    genre: 'Helianthus',
-    espece: 'annuus',
-    famille: 'Asteraceae',
-    categorie: 'Annuelles',
-    image:
-      'https://images.unsplash.com/photo-1597848212624-a19eb35e2651'
-  },
-  {
-    nomCommun: 'Pissenlit',
-    genre: 'Taraxacum',
-    espece: 'officinale',
-    famille: 'Asteraceae',
-    categorie: 'Vivaces',
-    image:
-      'https://images.unsplash.com/photo-1497250681960-ef046c08a56e'
-  }
-]
+let plants = []
 
 let quizPlants = []
 let currentIndex = 0
 let answerVisible = false
+
+async function loadPlants() {
+  try {
+    const response = await fetch('/api/plants')
+
+    if (!response.ok) {
+      throw new Error('Erreur API')
+    }
+
+    plants = await response.json()
+
+    console.log(`${plants.length} végétaux chargés depuis Notion`)
+  } catch (error) {
+    console.error(error)
+
+    alert(
+      "Impossible de charger les végétaux depuis Notion."
+    )
+  }
+}
+
+loadPlants()
 
 document.querySelector('#app').innerHTML = `
   <main class="container">
@@ -213,8 +216,9 @@ function displayPlant() {
   document.querySelector('#progress').textContent =
     `${currentIndex + 1} / ${quizPlants.length}`
 
-  document.querySelector('#plantImage').src = plant.image
-
+document.querySelector('#plantImage').src =
+  plant.photos?.[0] || ''
+  
   document.querySelector('#commonName').textContent =
     plant.nomCommun
 
