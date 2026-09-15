@@ -82,7 +82,7 @@ export default async function handler(req, res) {
         ),
 
         espece: getText(
-          properties['Espèce et cultivar']
+          properties['Cultivar']
         ),
 
         famille: getText(
