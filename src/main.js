@@ -102,6 +102,11 @@ document.querySelector('#app').innerHTML = `
 
           <div class="plant-info">
             <p>
+              <span>Catégorie</span>
+              <strong id="categorie"></strong>
+            </p>
+          
+            <p>
               <span>Genre</span>
               <strong id="genus"></strong>
             </p>
@@ -223,6 +228,9 @@ document.querySelector('#plantImage').src =
   plant.categorie
     ? `${plant.nomCommun} / ${plant.categorie}`
     : plant.nomCommun
+
+    document.querySelector('#categorie').textContent =
+    plant.categorie
 
   document.querySelector('#genus').textContent =
     plant.genre
