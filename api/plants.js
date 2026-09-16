@@ -27,16 +27,6 @@ function getText(property) {
 }
 
 // ================================
-// SELECT
-// ================================
-
-function getSelect(property) {
-  if (!property) return ''
-
-  return property.select?.name || ''
-}
-
-// ================================
 // MULTI-SELECT
 // ================================
 
@@ -59,6 +49,7 @@ function getPhotos(property) {
 
   return property.files
     .map(photo => {
+
       if (photo.type === 'file') {
         return photo.file?.url
       }
@@ -77,17 +68,20 @@ function getPhotos(property) {
 // ================================
 
 export default async function handler(req, res) {
+
   try {
 
     let allPages = []
     let cursor
 
     // Récupère toutes les plantes
-    // même si la base dépasse 100 entrées
+    // même si la base dépasse 100 végétaux
 
     do {
+
       const response =
         await notion.dataSources.query({
+
           data_source_id:
             process.env.NOTION_DATA_SOURCE_ID,
 
@@ -96,6 +90,7 @@ export default async function handler(req, res) {
           ...(cursor && {
             start_cursor: cursor
           })
+
         })
 
       allPages.push(...response.results)
@@ -107,34 +102,17 @@ export default async function handler(req, res) {
     } while (cursor)
 
     // ================================
-    // TRANSFORMATION
+    // TRANSFORMATION DES DONNÉES
     // ================================
 
     const plants = allPages.map(page => {
 
       const properties = page.properties
 
-      // IMPORTANT :
-      // affiche les noms EXACTS des colonnes
-      // reçues depuis Notion dans les logs Vercel
-
-      console.log(
-        'COLONNES NOTION:',
-        Object.keys(properties)
-      )
-
-      // Affiche aussi le nom + type
-      // de chaque propriété
-
-      Object.entries(properties).forEach(
-        ([name, property]) => {
-
-          console.log(
-            `PROPRIETE: "${name}" | TYPE: ${property.type}`
-          )
-
-        }
-      )
+      const categories =
+        getMultiSelect(
+          properties['Categorie']
+        )
 
       return {
 
@@ -160,10 +138,10 @@ export default async function handler(req, res) {
             properties['Famille']
           ),
 
+        // Une plante n'a normalement
+        // qu'une catégorie dans ton quiz.
         categorie:
-          getSelect(
-            properties['Catégorie']
-          ),
+          categories[0] || '',
 
         photos:
           getPhotos(
@@ -181,17 +159,13 @@ export default async function handler(req, res) {
           ),
 
         persistance:
-          getSelect(
+          getMultiSelect(
             properties['Persistance du feuillage']
           )
 
       }
 
     })
-
-    // ================================
-    // ENVOI AU QUIZ
-    // ================================
 
     res.status(200).json(plants)
 
@@ -208,4 +182,5 @@ export default async function handler(req, res) {
     })
 
   }
+
 }
