@@ -103,7 +103,7 @@ document.querySelector('#app').innerHTML = `
           <div class="plant-info">
             <p>
               <span>Catégorie</span>
-              <strong id="">Categorie</strong>
+              <strong id="c">Categorie</strong>
             </p>
           
             <p>
