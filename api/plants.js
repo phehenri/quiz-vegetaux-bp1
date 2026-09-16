@@ -4,9 +4,9 @@ const notion = new Client({
   auth: process.env.NOTION_TOKEN
 })
 
-// ========================================
+// ================================
 // TEXTE / TITRE
-// ========================================
+// ================================
 
 function getText(property) {
   if (!property) return ''
@@ -26,9 +26,9 @@ function getText(property) {
   return ''
 }
 
-// ========================================
+// ================================
 // SELECT
-// ========================================
+// ================================
 
 function getSelect(property) {
   if (!property) return ''
@@ -36,28 +36,29 @@ function getSelect(property) {
   return property.select?.name || ''
 }
 
-// ========================================
-// MULTI SELECT
-// ========================================
+// ================================
+// MULTI-SELECT
+// ================================
 
 function getMultiSelect(property) {
   if (!property) return []
 
-  return property.multi_select?.map(
-    item => item.name
-  ) || []
+  return (
+    property.multi_select?.map(
+      item => item.name
+    ) || []
+  )
 }
 
-// ========================================
+// ================================
 // PHOTOS
-// ========================================
+// ================================
 
 function getPhotos(property) {
   if (!property?.files) return []
 
   return property.files
     .map(photo => {
-
       if (photo.type === 'file') {
         return photo.file?.url
       }
@@ -71,25 +72,22 @@ function getPhotos(property) {
     .filter(Boolean)
 }
 
-// ========================================
+// ================================
 // API
-// ========================================
+// ================================
 
 export default async function handler(req, res) {
-
   try {
 
     let allPages = []
     let cursor
 
-    // Récupération de toutes les plantes
-    // (pagination si la base dépasse 100 plantes)
+    // Récupère toutes les plantes
+    // même si la base dépasse 100 entrées
 
     do {
-
       const response =
         await notion.dataSources.query({
-
           data_source_id:
             process.env.NOTION_DATA_SOURCE_ID,
 
@@ -98,7 +96,6 @@ export default async function handler(req, res) {
           ...(cursor && {
             start_cursor: cursor
           })
-
         })
 
       allPages.push(...response.results)
@@ -109,34 +106,34 @@ export default async function handler(req, res) {
 
     } while (cursor)
 
-    // ========================================
-    // TRANSFORMATION DES DONNÉES NOTION
-    // ========================================
+    // ================================
+    // TRANSFORMATION
+    // ================================
 
     const plants = allPages.map(page => {
 
       const properties = page.properties
 
-      // TEMPORAIRE :
-      // permet de voir exactement comment Notion
-      // renvoie ces deux propriétés dans Vercel Logs
+      // IMPORTANT :
+      // affiche les noms EXACTS des colonnes
+      // reçues depuis Notion dans les logs Vercel
 
       console.log(
-        'CATEGORIE NOTION:',
-        JSON.stringify(
-          properties['Catégorie'],
-          null,
-          2
-        )
+        'COLONNES NOTION:',
+        Object.keys(properties)
       )
 
-      console.log(
-        'ESPECE NOTION:',
-        JSON.stringify(
-          properties["Espèce et 'Cultivar'"],
-          null,
-          2
-        )
+      // Affiche aussi le nom + type
+      // de chaque propriété
+
+      Object.entries(properties).forEach(
+        ([name, property]) => {
+
+          console.log(
+            `PROPRIETE: "${name}" | TYPE: ${property.type}`
+          )
+
+        }
       )
 
       return {
@@ -192,9 +189,9 @@ export default async function handler(req, res) {
 
     })
 
-    // ========================================
-    // RÉPONSE JSON
-    // ========================================
+    // ================================
+    // ENVOI AU QUIZ
+    // ================================
 
     res.status(200).json(plants)
 
@@ -211,5 +208,4 @@ export default async function handler(req, res) {
     })
 
   }
-
 }
