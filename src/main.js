@@ -1,10 +1,14 @@
 import './style.css'
 
 let plants = []
-
 let quizPlants = []
 let currentIndex = 0
 let answerVisible = false
+let selectedCategory = 'all'
+
+// ================================
+// CHARGEMENT DES PLANTES DE NOTION
+// ================================
 
 async function loadPlants() {
   try {
@@ -28,24 +32,38 @@ async function loadPlants() {
 
 loadPlants()
 
+// ================================
+// INTERFACE
+// ================================
+
 document.querySelector('#app').innerHTML = `
   <main class="container">
 
     <section id="home">
+
       <div class="hero">
         <span class="plant-icon">🌿</span>
+
         <h1>Quiz végétaux</h1>
-        <p>Révise les végétaux de ton BP Aménagements Paysagers.</p>
+
+        <p>
+          Révise les végétaux de ton BP Aménagements Paysagers.
+        </p>
       </div>
 
       <div class="quiz-options">
+
         <h2>Que veux-tu réviser ?</h2>
 
-        <button class="category selected" data-category="all">
+        <button
+          class="category selected"
+          data-category="all"
+        >
           Toute la base
         </button>
 
         <div class="categories">
+
           ${[
             'Arbres',
             'Arbustes',
@@ -58,54 +76,79 @@ document.querySelector('#app').innerHTML = `
           ]
             .map(
               category => `
-                <button class="category" data-category="${category}">
+                <button
+                  class="category"
+                  data-category="${category}"
+                >
                   ${category}
                 </button>
               `
             )
             .join('')}
+
         </div>
 
         <button id="startQuiz" class="primary">
           Commencer le quiz
         </button>
+
       </div>
+
     </section>
+
+
+    <!-- QUIZ -->
 
     <section id="quiz" class="hidden">
 
       <div class="quiz-header">
+
         <button id="quitQuiz" class="back">
           ← Quitter
         </button>
 
         <span id="progress"></span>
+
       </div>
 
       <div class="card">
 
-        <img id="plantImage" alt="Végétal à identifier">
+        <img
+          id="plantImage"
+          alt="Végétal à identifier"
+        >
+
+        <!-- QUESTION -->
 
         <div id="question">
+
           <p class="question">
             Quel est ce végétal ?
           </p>
 
-          <button id="showAnswer" class="primary">
+          <button
+            id="showAnswer"
+            class="primary"
+          >
             Afficher la réponse
           </button>
+
         </div>
+
+
+        <!-- RÉPONSE -->
 
         <div id="answer" class="hidden">
 
           <h2 id="commonName"></h2>
 
           <div class="plant-info">
+
             <p>
               <span>Catégorie</span>
-              <strong id="c">Categorie</strong>
+              <strong id="categorie"></strong>
             </p>
-          
+
             <p>
               <span>Genre</span>
               <strong id="genus"></strong>
@@ -120,9 +163,13 @@ document.querySelector('#app').innerHTML = `
               <span>Famille</span>
               <strong id="family"></strong>
             </p>
+
           </div>
 
-          <button id="nextPlant" class="primary">
+          <button
+            id="nextPlant"
+            class="primary"
+          >
             Végétal suivant →
           </button>
 
@@ -132,122 +179,248 @@ document.querySelector('#app').innerHTML = `
 
     </section>
 
-    <section id="finished" class="hidden">
-      <div class="finish">
-        <span>🌱</span>
-        <h2>Révision terminée !</h2>
-        <p>Tu as parcouru tous les végétaux de cette sélection.</p>
 
-        <button id="restart" class="primary">
+    <!-- FIN DU QUIZ -->
+
+    <section id="finished" class="hidden">
+
+      <div class="finish">
+
+        <span>🌱</span>
+
+        <h2>Révision terminée !</h2>
+
+        <p>
+          Tu as parcouru tous les végétaux de cette sélection.
+        </p>
+
+        <button
+          id="restart"
+          class="primary"
+        >
           Recommencer
         </button>
+
       </div>
+
     </section>
 
   </main>
 `
 
-let selectedCategory = 'all'
+// ================================
+// CHOIX DE LA CATÉGORIE
+// ================================
 
 document.querySelectorAll('.category').forEach(button => {
+
   button.addEventListener('click', () => {
+
     document
       .querySelectorAll('.category')
       .forEach(btn => btn.classList.remove('selected'))
 
     button.classList.add('selected')
+
     selectedCategory = button.dataset.category
+
   })
+
 })
 
-document.querySelector('#startQuiz').addEventListener('click', () => {
-  if (selectedCategory === 'all') {
-    quizPlants = [...plants]
-  } else {
-    quizPlants = plants.filter(
-      plant => plant.categorie === selectedCategory
-    )
-  }
+// ================================
+// COMMENCER LE QUIZ
+// ================================
 
-  if (quizPlants.length === 0) {
-    alert("Il n'y a encore aucun végétal dans cette catégorie.")
-    return
-  }
+document
+  .querySelector('#startQuiz')
+  .addEventListener('click', () => {
 
-  shuffle(quizPlants)
+    if (selectedCategory === 'all') {
 
-  currentIndex = 0
+      quizPlants = [...plants]
 
-  document.querySelector('#home').classList.add('hidden')
-  document.querySelector('#quiz').classList.remove('hidden')
+    } else {
 
-  displayPlant()
-})
+      quizPlants = plants.filter(
+        plant => plant.categorie === selectedCategory
+      )
 
-document.querySelector('#showAnswer').addEventListener('click', () => {
-  answerVisible = true
+    }
 
-  document.querySelector('#question').classList.add('hidden')
-  document.querySelector('#answer').classList.remove('hidden')
-})
+    if (quizPlants.length === 0) {
 
-document.querySelector('#nextPlant').addEventListener('click', () => {
-  currentIndex++
+      alert(
+        "Il n'y a encore aucun végétal dans cette catégorie."
+      )
 
-  if (currentIndex >= quizPlants.length) {
-    document.querySelector('#quiz').classList.add('hidden')
-    document.querySelector('#finished').classList.remove('hidden')
-    return
-  }
+      return
+    }
 
-  displayPlant()
-})
+    shuffle(quizPlants)
 
-document.querySelector('#quitQuiz').addEventListener('click', () => {
-  document.querySelector('#quiz').classList.add('hidden')
-  document.querySelector('#home').classList.remove('hidden')
-})
+    currentIndex = 0
 
-document.querySelector('#restart').addEventListener('click', () => {
-  document.querySelector('#finished').classList.add('hidden')
-  document.querySelector('#home').classList.remove('hidden')
-})
+    document
+      .querySelector('#home')
+      .classList.add('hidden')
+
+    document
+      .querySelector('#quiz')
+      .classList.remove('hidden')
+
+    displayPlant()
+
+  })
+
+// ================================
+// AFFICHER LA RÉPONSE
+// ================================
+
+document
+  .querySelector('#showAnswer')
+  .addEventListener('click', () => {
+
+    answerVisible = true
+
+    document
+      .querySelector('#question')
+      .classList.add('hidden')
+
+    document
+      .querySelector('#answer')
+      .classList.remove('hidden')
+
+  })
+
+// ================================
+// PLANTE SUIVANTE
+// ================================
+
+document
+  .querySelector('#nextPlant')
+  .addEventListener('click', () => {
+
+    currentIndex++
+
+    if (currentIndex >= quizPlants.length) {
+
+      document
+        .querySelector('#quiz')
+        .classList.add('hidden')
+
+      document
+        .querySelector('#finished')
+        .classList.remove('hidden')
+
+      return
+    }
+
+    displayPlant()
+
+  })
+
+// ================================
+// QUITTER LE QUIZ
+// ================================
+
+document
+  .querySelector('#quitQuiz')
+  .addEventListener('click', () => {
+
+    document
+      .querySelector('#quiz')
+      .classList.add('hidden')
+
+    document
+      .querySelector('#home')
+      .classList.remove('hidden')
+
+  })
+
+// ================================
+// RECOMMENCER
+// ================================
+
+document
+  .querySelector('#restart')
+  .addEventListener('click', () => {
+
+    document
+      .querySelector('#finished')
+      .classList.add('hidden')
+
+    document
+      .querySelector('#home')
+      .classList.remove('hidden')
+
+  })
+
+// ================================
+// AFFICHER UNE PLANTE
+// ================================
 
 function displayPlant() {
+
   const plant = quizPlants[currentIndex]
 
   answerVisible = false
 
+  // Progression
   document.querySelector('#progress').textContent =
     `${currentIndex + 1} / ${quizPlants.length}`
 
-document.querySelector('#plantImage').src =
-  plant.photos?.[0] || ''
+  // Photo
+  document.querySelector('#plantImage').src =
+    plant.photos?.[0] || ''
 
+  // Nom commun
   document.querySelector('#commonName').textContent =
-  plant.categorie
-    ? `${plant.nomCommun} / ${plant.categorie}`
-    : plant.nomCommun
+    plant.nomCommun || ''
 
-    document.querySelector('#categorie').textContent =
-    plant.categorie
+  // Catégorie
+  document.querySelector('#categorie').textContent =
+    plant.categorie || ''
 
+  // Genre
   document.querySelector('#genus').textContent =
-    plant.genre
+    plant.genre || ''
 
+  // Espèce / Cultivar
   document.querySelector('#species').textContent =
-    plant.espece
+    plant.espece || ''
 
+  // Famille
   document.querySelector('#family').textContent =
-    plant.famille
+    plant.famille || ''
 
-  document.querySelector('#question').classList.remove('hidden')
-  document.querySelector('#answer').classList.add('hidden')
+  // On réaffiche la question
+  document
+    .querySelector('#question')
+    .classList.remove('hidden')
+
+  // On cache la réponse
+  document
+    .querySelector('#answer')
+    .classList.add('hidden')
+
 }
 
+// ================================
+// MÉLANGER LES PLANTES
+// ================================
+
 function shuffle(array) {
+
   for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[array[i], array[j]] = [array[j], array[i]]
+
+    const j = Math.floor(
+      Math.random() * (i + 1)
+    )
+
+    ;[array[i], array[j]] =
+      [array[j], array[i]]
+
   }
+
 }
