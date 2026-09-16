@@ -1,43 +1,22 @@
 import './style.css'
 
+// ==================================================
+// VARIABLES
+// ==================================================
+
 let plants = []
 let quizPlants = []
 let currentIndex = 0
-let answerVisible = false
 let selectedCategory = 'all'
 
-// ================================
-// CHARGEMENT DES PLANTES DE NOTION
-// ================================
-
-async function loadPlants() {
-  try {
-    const response = await fetch('/api/plants')
-
-    if (!response.ok) {
-      throw new Error('Erreur API')
-    }
-
-    plants = await response.json()
-
-    console.log(`${plants.length} végétaux chargés depuis Notion`)
-  } catch (error) {
-    console.error(error)
-
-    alert(
-      "Impossible de charger les végétaux depuis Notion."
-    )
-  }
-}
-
-loadPlants()
-
-// ================================
+// ==================================================
 // INTERFACE
-// ================================
+// ==================================================
 
 document.querySelector('#app').innerHTML = `
   <main class="container">
+
+    <!-- ACCUEIL -->
 
     <section id="home">
 
@@ -74,22 +53,24 @@ document.querySelector('#app').innerHTML = `
             'Annuelles',
             'Bisannuelles'
           ]
-            .map(
-              category => `
-                <button
-                  class="category"
-                  data-category="${category}"
-                >
-                  ${category}
-                </button>
-              `
-            )
+            .map(category => `
+              <button
+                class="category"
+                data-category="${category}"
+              >
+                ${category}
+              </button>
+            `)
             .join('')}
 
         </div>
 
-        <button id="startQuiz" class="primary">
-          Commencer le quiz
+        <button
+          id="startQuiz"
+          class="primary"
+          disabled
+        >
+          Chargement...
         </button>
 
       </div>
@@ -144,24 +125,39 @@ document.querySelector('#app').innerHTML = `
 
           <div class="plant-info">
 
-            <p>
+            <p id="categoryRow">
               <span>Catégorie</span>
               <strong id="categorie"></strong>
             </p>
 
-            <p>
+            <p id="genusRow">
               <span>Genre</span>
               <strong id="genus"></strong>
             </p>
 
-            <p>
-              <span>Espèce / 'Cultivar'</span>
+            <p id="speciesRow">
+              <span>Espèce / Cultivar</span>
               <strong id="species"></strong>
             </p>
 
-            <p>
+            <p id="familyRow">
               <span>Famille</span>
               <strong id="family"></strong>
+            </p>
+
+            <p id="expositionRow">
+              <span>Exposition</span>
+              <strong id="exposition"></strong>
+            </p>
+
+            <p id="floraisonRow">
+              <span>Mois de floraison</span>
+              <strong id="floraison"></strong>
+            </p>
+
+            <p id="persistanceRow">
+              <span>Persistance du feuillage</span>
+              <strong id="persistance"></strong>
             </p>
 
           </div>
@@ -180,7 +176,7 @@ document.querySelector('#app').innerHTML = `
     </section>
 
 
-    <!-- FIN DU QUIZ -->
+    <!-- FIN -->
 
     <section id="finished" class="hidden">
 
@@ -208,33 +204,88 @@ document.querySelector('#app').innerHTML = `
   </main>
 `
 
-// ================================
+// ==================================================
+// CHARGEMENT DE NOTION
+// ==================================================
+
+async function loadPlants() {
+  const startButton =
+    document.querySelector('#startQuiz')
+
+  try {
+    const response = await fetch('/api/plants', {
+      cache: 'no-store'
+    })
+
+    if (!response.ok) {
+      throw new Error(
+        `Erreur API : ${response.status}`
+      )
+    }
+
+    plants = await response.json()
+
+    console.log(
+      'Végétaux reçus depuis Notion :',
+      plants
+    )
+
+    startButton.disabled = false
+    startButton.textContent = 'Commencer le quiz'
+
+  } catch (error) {
+    console.error(error)
+
+    startButton.textContent =
+      'Erreur de chargement'
+
+    alert(
+      "Impossible de charger les végétaux depuis Notion."
+    )
+  }
+}
+
+loadPlants()
+
+// ==================================================
 // CHOIX DE LA CATÉGORIE
-// ================================
+// ==================================================
 
-document.querySelectorAll('.category').forEach(button => {
+document
+  .querySelectorAll('.category')
+  .forEach(button => {
 
-  button.addEventListener('click', () => {
+    button.addEventListener('click', () => {
 
-    document
-      .querySelectorAll('.category')
-      .forEach(btn => btn.classList.remove('selected'))
+      document
+        .querySelectorAll('.category')
+        .forEach(btn => {
+          btn.classList.remove('selected')
+        })
 
-    button.classList.add('selected')
+      button.classList.add('selected')
 
-    selectedCategory = button.dataset.category
+      selectedCategory =
+        button.dataset.category
+    })
 
   })
 
-})
-
-// ================================
+// ==================================================
 // COMMENCER LE QUIZ
-// ================================
+// ==================================================
 
 document
   .querySelector('#startQuiz')
   .addEventListener('click', () => {
+
+    if (plants.length === 0) {
+      alert(
+        "Les végétaux ne sont pas encore chargés."
+      )
+
+      return
+    }
 
     if (selectedCategory === 'all') {
 
@@ -242,9 +293,13 @@ document
 
     } else {
 
-      quizPlants = plants.filter(
-        plant => plant.categorie === selectedCategory
-      )
+      quizPlants = plants.filter(plant => {
+
+        return plant.categories?.includes(
+          selectedCategory
+        )
+
+      })
 
     }
 
@@ -266,22 +321,23 @@ document
       .classList.add('hidden')
 
     document
+      .querySelector('#finished')
+      .classList.add('hidden')
+
+    document
       .querySelector('#quiz')
       .classList.remove('hidden')
 
     displayPlant()
-
   })
 
-// ================================
+// ==================================================
 // AFFICHER LA RÉPONSE
-// ================================
+// ==================================================
 
 document
   .querySelector('#showAnswer')
   .addEventListener('click', () => {
-
-    answerVisible = true
 
     document
       .querySelector('#question')
@@ -293,9 +349,9 @@ document
 
   })
 
-// ================================
-// PLANTE SUIVANTE
-// ================================
+// ==================================================
+// VÉGÉTAL SUIVANT
+// ==================================================
 
 document
   .querySelector('#nextPlant')
@@ -317,12 +373,11 @@ document
     }
 
     displayPlant()
-
   })
 
-// ================================
-// QUITTER LE QUIZ
-// ================================
+// ==================================================
+// QUITTER
+// ==================================================
 
 document
   .querySelector('#quitQuiz')
@@ -338,9 +393,9 @@ document
 
   })
 
-// ================================
+// ==================================================
 // RECOMMENCER
-// ================================
+// ==================================================
 
 document
   .querySelector('#restart')
@@ -356,63 +411,152 @@ document
 
   })
 
-// ================================
+// ==================================================
 // AFFICHER UNE PLANTE
-// ================================
+// ==================================================
 
 function displayPlant() {
-
   const plant = quizPlants[currentIndex]
 
-  answerVisible = false
-
   // Progression
+
   document.querySelector('#progress').textContent =
     `${currentIndex + 1} / ${quizPlants.length}`
 
   // Photo
-  document.querySelector('#plantImage').src =
-    plant.photos?.[0] || ''
+
+  const image =
+    document.querySelector('#plantImage')
+
+  if (plant.photos?.length > 0) {
+
+    image.src = plant.photos[0]
+    image.style.display = ''
+
+  } else {
+
+    image.removeAttribute('src')
+    image.style.display = 'none'
+
+  }
 
   // Nom commun
-  document.querySelector('#commonName').textContent =
+
+  document.querySelector(
+    '#commonName'
+  ).textContent =
     plant.nomCommun || ''
 
   // Catégorie
-  document.querySelector('#categorie').textContent =
-    plant.categorie || ''
+
+  setInfo(
+    'categoryRow',
+    'categorie',
+    plant.categorie
+  )
 
   // Genre
-  document.querySelector('#genus').textContent =
-    plant.genre || ''
+
+  setInfo(
+    'genusRow',
+    'genus',
+    plant.genre
+  )
 
   // Espèce / Cultivar
-  document.querySelector('#species').textContent =
-    plant.espece || ''
+
+  setInfo(
+    'speciesRow',
+    'species',
+    plant.espece
+  )
 
   // Famille
-  document.querySelector('#family').textContent =
-    plant.famille || ''
 
-  // On réaffiche la question
+  setInfo(
+    'familyRow',
+    'family',
+    plant.famille
+  )
+
+  // Exposition
+
+  setInfo(
+    'expositionRow',
+    'exposition',
+    plant.exposition
+  )
+
+  // Floraison
+
+  setInfo(
+    'floraisonRow',
+    'floraison',
+    plant.floraison
+  )
+
+  // Persistance
+
+  setInfo(
+    'persistanceRow',
+    'persistance',
+    plant.persistance
+  )
+
+  // Question visible
+
   document
     .querySelector('#question')
     .classList.remove('hidden')
 
-  // On cache la réponse
+  // Réponse cachée
+
   document
     .querySelector('#answer')
     .classList.add('hidden')
-
 }
 
-// ================================
-// MÉLANGER LES PLANTES
-// ================================
+// ==================================================
+// AFFICHER / MASQUER UNE INFORMATION
+// ==================================================
+
+function setInfo(rowId, valueId, value) {
+  const row =
+    document.querySelector(`#${rowId}`)
+
+  const element =
+    document.querySelector(`#${valueId}`)
+
+  let text = ''
+
+  if (Array.isArray(value)) {
+    text = value.join(', ')
+  } else {
+    text = value || ''
+  }
+
+  element.textContent = text
+
+  // Si la propriété n'est pas encore renseignée
+  // dans Notion, on masque toute la ligne.
+
+  if (text.trim() === '') {
+    row.style.display = 'none'
+  } else {
+    row.style.display = ''
+  }
+}
+
+// ==================================================
+// MÉLANGER LES VÉGÉTAUX
+// ==================================================
 
 function shuffle(array) {
-
-  for (let i = array.length - 1; i > 0; i--) {
+  for (
+    let i = array.length - 1;
+    i > 0;
+    i--
+  ) {
 
     const j = Math.floor(
       Math.random() * (i + 1)
@@ -420,7 +564,5 @@ function shuffle(array) {
 
     ;[array[i], array[j]] =
       [array[j], array[i]]
-
   }
-
 }
