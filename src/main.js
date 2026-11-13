@@ -125,10 +125,7 @@ document.querySelector('#app').innerHTML = `
 
           <div class="plant-info">
 
-            <p id="categoryRow">
-              <span>Catégorie</span>
-              <strong id="categorie"></strong>
-            </p>
+            
 
             <p id="genusRow">
               <span>Genre</span>
@@ -143,6 +140,11 @@ document.querySelector('#app').innerHTML = `
             <p id="familyRow">
               <span>Famille</span>
               <strong id="family"></strong>
+            </p>
+
+            <p id="categoryRow">
+              <span>Catégorie</span>
+              <strong id="categorie"></strong>
             </p>
 
             <p id="expositionRow">
