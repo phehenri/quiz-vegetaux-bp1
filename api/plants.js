@@ -23,11 +23,9 @@ function getText(property) {
         .map(item => item.plain_text)
         .join('')
 
-    // Gestion des propriétés de type Sélection
     case 'select':
       return property.select?.name || ''
 
-    // Gestion des propriétés de type Sélection multiple
     case 'multi_select':
       return property.multi_select
         .map(item => item.name)
@@ -38,6 +36,9 @@ function getText(property) {
   }
 }
 
+// ==================================================
+// GESTION DES SÉLECTIONS NOTION
+// ==================================================
 
 function getMultiSelect(property) {
   if (!property) return []
@@ -57,9 +58,9 @@ function getMultiSelect(property) {
   return []
 }
 
-
-  return property.multi_select.map(item => item.name)
-}
+// ==================================================
+// RÉCUPÉRATION DES PHOTOS
+// ==================================================
 
 function getPhotos(property) {
   if (!property || property.type !== 'files') {
@@ -146,15 +147,12 @@ export default async function handler(req, res) {
           properties['Espèce et Cultivar']
         ),
 
-        // Famille : fonctionne avec Sélection (Select)
         famille: getText(
           properties['Famille']
         ),
 
-        // On conserve toutes les catégories
+        // Catégorie
         categories: categories,
-
-        // Et une version simple pour le quiz
         categorie: categories.join(', '),
 
         photos: getPhotos(
@@ -169,8 +167,9 @@ export default async function handler(req, res) {
       }
     })
 
-    // Évite les problèmes de cache
-    // pendant les modifications de la base Notion
+    // ==================================================
+    // RÉPONSE API
+    // ==================================================
 
     res.setHeader(
       'Cache-Control',
