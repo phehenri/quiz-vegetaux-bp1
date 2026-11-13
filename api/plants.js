@@ -38,12 +38,25 @@ function getText(property) {
   }
 }
 
+
 function getMultiSelect(property) {
   if (!property) return []
 
-  if (property.type !== 'multi_select') {
-    return []
+  // Sélection multiple
+  if (property.type === 'multi_select') {
+    return property.multi_select.map(item => item.name)
   }
+
+  // Sélection unique
+  if (property.type === 'select') {
+    return property.select?.name
+      ? [property.select.name]
+      : []
+  }
+
+  return []
+}
+
 
   return property.multi_select.map(item => item.name)
 }
