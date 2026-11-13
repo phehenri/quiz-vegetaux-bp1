@@ -1,3 +1,4 @@
+
 import { Client } from '@notionhq/client'
 
 const notion = new Client({
@@ -11,19 +12,30 @@ const notion = new Client({
 function getText(property) {
   if (!property) return ''
 
-  if (property.type === 'title') {
-    return property.title
-      .map(item => item.plain_text)
-      .join('')
-  }
+  switch (property.type) {
+    case 'title':
+      return property.title
+        .map(item => item.plain_text)
+        .join('')
 
-  if (property.type === 'rich_text') {
-    return property.rich_text
-      .map(item => item.plain_text)
-      .join('')
-  }
+    case 'rich_text':
+      return property.rich_text
+        .map(item => item.plain_text)
+        .join('')
 
-  return ''
+    // Gestion des propriétés de type Sélection
+    case 'select':
+      return property.select?.name || ''
+
+    // Gestion des propriétés de type Sélection multiple
+    case 'multi_select':
+      return property.multi_select
+        .map(item => item.name)
+        .join(', ')
+
+    default:
+      return ''
+  }
 }
 
 function getMultiSelect(property) {
@@ -121,6 +133,7 @@ export default async function handler(req, res) {
           properties['Espèce et Cultivar']
         ),
 
+        // Famille : fonctionne avec Sélection (Select)
         famille: getText(
           properties['Famille']
         ),
@@ -143,8 +156,9 @@ export default async function handler(req, res) {
       }
     })
 
-    // On peut éviter les problèmes de cache
-    // pendant que tu modifies ta base Notion
+    // Évite les problèmes de cache
+    // pendant les modifications de la base Notion
+
     res.setHeader(
       'Cache-Control',
       'no-store, max-age=0'
